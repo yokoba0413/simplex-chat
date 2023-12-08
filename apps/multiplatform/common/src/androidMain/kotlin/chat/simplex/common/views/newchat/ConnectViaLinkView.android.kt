@@ -32,10 +32,10 @@ actual fun ConnectViaLinkView(m: ChatModel, rh: RemoteHostInfo?, close: () -> Un
   ) {
     Column(Modifier.weight(1f)) {
       when (selection.value) {
-        ConnectViaLinkTab.SCAN -> {
+        NewChatMenuOption.NEW_CONTACT -> {
           ScanToConnectView(m, rh, close)
         }
-        ConnectViaLinkTab.PASTE -> {
+        NewChatMenuOption. -> {
           PasteToConnectView(m, rh, close)
         }
       }

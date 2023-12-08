@@ -35,8 +35,11 @@ suspend fun planAndConnect(
   chatModel: ChatModel,
   rhId: Long?,
   uri: URI,
+  dismiss: Boolean,
   incognito: Boolean?,
-  close: (() -> Unit)?
+  close: (() -> Unit)?,
+  filterKnownContact: ((Contact) -> Unit)? = null,
+  filterKnownGroup: ((GroupInfo) -> Unit)? = null,
 ) {
   val connectionPlan = chatModel.controller.apiConnectPlan(rhId, uri.toString())
   if (connectionPlan != null) {

@@ -110,27 +110,6 @@ fun AddContactLayout(
 }
 
 @Composable
-fun ShareLinkButton(connReqInvitation: String) {
-  val clipboard = LocalClipboardManager.current
-  SettingsActionItem(
-    painterResource(MR.images.ic_share),
-    stringResource(MR.strings.share_invitation_link),
-    click = { clipboard.shareText(simplexChatLink(connReqInvitation)) },
-    iconColor = MaterialTheme.colors.primary,
-    textColor = MaterialTheme.colors.primary,
-  )
-}
-
-@Composable
-fun OneTimeLinkLearnMoreButton(onClick: () -> Unit) {
-  SettingsActionItem(
-    painterResource(MR.images.ic_info),
-    stringResource(MR.strings.learn_more),
-    onClick,
-  )
-}
-
-@Composable
 fun IncognitoToggle(
   incognitoPref: SharedPreference<Boolean>,
   incognito: MutableState<Boolean>,

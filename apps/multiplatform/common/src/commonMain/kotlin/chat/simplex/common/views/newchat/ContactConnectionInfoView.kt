@@ -37,7 +37,7 @@ fun ContactConnectionInfoView(
   close: () -> Unit
 ) {
   LaunchedEffect(connReqInvitation) {
-    chatModel.connReqInv.value = connReqInvitation
+    chatModel.showingInvitation.value = connReqInvitation
   }
   /** When [AddContactView] is open, we don't need to drop [chatModel.connReqInv].
    * Otherwise, it will be called here AFTER [AddContactView] is launched and will clear the value too soon.
@@ -46,7 +46,7 @@ fun ContactConnectionInfoView(
   DisposableEffect(Unit) {
     onDispose {
       if (!ModalManager.center.hasModalsOpen()) {
-        chatModel.connReqInv.value = null
+        chatModel.showingInvitation.value = null
       }
     }
   }
@@ -156,6 +156,27 @@ private fun ContactConnectionInfoLayout(
 
     SectionBottomSpacer()
   }
+}
+
+@Composable
+fun ShareLinkButton(connReqInvitation: String) {
+  val clipboard = LocalClipboardManager.current
+  SettingsActionItem(
+    painterResource(MR.images.ic_share),
+    stringResource(MR.strings.share_invitation_link),
+    click = { clipboard.shareText(simplexChatLink(connReqInvitation)) },
+    iconColor = MaterialTheme.colors.primary,
+    textColor = MaterialTheme.colors.primary,
+  )
+}
+
+@Composable
+fun OneTimeLinkLearnMoreButton(onClick: () -> Unit) {
+  SettingsActionItem(
+    painterResource(MR.images.ic_info),
+    stringResource(MR.strings.learn_more),
+    onClick,
+  )
 }
 
 @Composable

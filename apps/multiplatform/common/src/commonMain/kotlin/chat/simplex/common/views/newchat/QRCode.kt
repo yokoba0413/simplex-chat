@@ -24,13 +24,15 @@ fun SimpleXLinkQRCode(
   connReq: String,
   modifier: Modifier = Modifier,
   tintColor: Color = Color(0xff062d56),
-  withLogo: Boolean = true
+  withLogo: Boolean = true,
+  onShare: (() -> Unit)? = null,
 ) {
   QRCode(
     simplexChatLink(connReq),
     modifier,
     tintColor,
-    withLogo
+    withLogo,
+    onShare,
   )
 }
 
@@ -47,7 +49,8 @@ fun QRCode(
   connReq: String,
   modifier: Modifier = Modifier,
   tintColor: Color = Color(0xff062d56),
-  withLogo: Boolean = true
+  withLogo: Boolean = true,
+  onShare: (() -> Unit)? = null,
 ) {
   val scope = rememberCoroutineScope()
 
@@ -70,6 +73,7 @@ fun QRCode(
             val file = saveTempImageUncompressed(image, false)
             if (file != null) {
               shareFile("", CryptoFile.plain(file.absolutePath))
+              onShare?.invoke()
             }
           }
         }

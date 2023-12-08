@@ -15,18 +15,18 @@ import chat.simplex.common.views.usersettings.UserAddressView
 import chat.simplex.res.MR
 
 enum class CreateLinkTab {
-  ONE_TIME, LONG_TERM
+  INVITE, CONNECT
 }
 
 @Composable
-fun CreateLinkView(m: ChatModel, rh: RemoteHostInfo?, initialSelection: CreateLinkTab) {
-  val selection = remember { mutableStateOf(initialSelection) }
-  val connReqInvitation = rememberSaveable { m.connReqInv }
+fun NewChatView(m: ChatModel, rh: RemoteHostInfo?, selection: CreateLinkTab, showQRCodeScanner: Boolean, close: () -> Unit) {
+  val selection = remember { mutableStateOf(selection) }
+  val connReqInvitation = rememberSaveable { m.showingInvitation }
   val contactConnection: MutableState<PendingContactConnection?> = rememberSaveable(stateSaver = serializableSaver()) { mutableStateOf(null) }
   val creatingConnReq = rememberSaveable { mutableStateOf(false) }
   LaunchedEffect(selection.value) {
     if (
-      selection.value == CreateLinkTab.ONE_TIME
+      selection.value == CreateLinkTab.INVITE
       && connReqInvitation.value.isNullOrEmpty()
       && contactConnection.value == null
       && !creatingConnReq.value
@@ -41,17 +41,17 @@ fun CreateLinkView(m: ChatModel, rh: RemoteHostInfo?, initialSelection: CreateLi
   DisposableEffect(Unit) {
     onDispose {
       if (!ModalManager.center.hasModalsOpen()) {
-        m.connReqInv.value = null
+        m.showingInvitation.value = null
       }
     }
   }
   val tabTitles = CreateLinkTab.values().map {
     when {
-      it == CreateLinkTab.ONE_TIME && connReqInvitation.value.isNullOrEmpty() && contactConnection.value == null ->
+      it == CreateLinkTab.INVITE && connReqInvitation.value.isNullOrEmpty() && contactConnection.value == null ->
         stringResource(MR.strings.create_one_time_link)
-      it == CreateLinkTab.ONE_TIME ->
+      it == CreateLinkTab.INVITE ->
         stringResource(MR.strings.one_time_link)
-      it == CreateLinkTab.LONG_TERM ->
+      it == CreateLinkTab.CONNECT ->
         stringResource(MR.strings.your_simplex_contact_address)
       else -> ""
     }
@@ -63,10 +63,10 @@ fun CreateLinkView(m: ChatModel, rh: RemoteHostInfo?, initialSelection: CreateLi
   ) {
     Column(Modifier.weight(1f)) {
       when (selection.value) {
-        CreateLinkTab.ONE_TIME -> {
+        CreateLinkTab.INVITE -> {
           AddContactView(m, rh,connReqInvitation.value ?: "", contactConnection)
         }
-        CreateLinkTab.LONG_TERM -> {
+        CreateLinkTab.CONNECT -> {
           UserAddressView(m, viaCreateLinkView = true, close = {})
         }
       }
@@ -85,7 +85,7 @@ fun CreateLinkView(m: ChatModel, rh: RemoteHostInfo?, initialSelection: CreateLi
           text = { Text(it, fontSize = 13.sp) },
           icon = {
             Icon(
-              if (CreateLinkTab.ONE_TIME.ordinal == index) painterResource(MR.images.ic_repeat_one) else painterResource(MR.images.ic_all_inclusive),
+              if (CreateLinkTab.INVITE.ordinal == index) painterResource(MR.images.ic_repeat_one) else painterResource(MR.images.ic_all_inclusive),
               it
             )
           },
@@ -115,4 +115,17 @@ private fun createInvitation(
       creatingConnReq.value = false
     }
   }
+}
+
+fun strIsSimplexLink(str: String): Boolean {
+  val parsedMd = parseToMarkdown(str)
+  return parsedMd != null && parsedMd.size == 1 && parsedMd[0].format is Format.SimplexLink
+}
+
+fun strHasSingleSimplexLink(str: String): FormattedText? {
+  val parsedMd = parseToMarkdown(str) ?: return null
+  val parsedLinks = parsedMd.filter { it.format?.isSimplexLink ?: false }
+  if (parsedLinks.size != 1) return null
+
+  return parsedLinks[0]
 }
